@@ -3,87 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>工时计算器 V3.6 - 全设备适配版</title>
+    <title>工时计算器 V3.7 - 状态增强版</title>
     <style>
         :root { 
             --primary: #007aff; --bg: #f5f5f7; --card: #ffffff; --text: #1d1d1f; 
             --sub-text: #86868b; --border: #d2d2d7; --input-bg: #f5f5f7;
             --status-red: #ff3b30; --status-yellow: #ff9500; --status-green: #34c759;
         }
-
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #000000; --card: #1c1c1e; --text: #f5f5f7; --sub-text: #a1a1a6;
                 --border: #38383a; --input-bg: #2c2c2e;
             }
         }
-
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
             background: var(--bg); color: var(--text); max-width: 900px; margin: 0 auto; padding: 15px; 
             line-height: 1.4; -webkit-font-smoothing: antialiased;
         }
-
-        /* 仪表盘自适应 */
         .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(100%, 1fr)); gap: 12px; margin-bottom: 20px; }
         @media (min-width: 600px) { .dashboard { grid-template-columns: repeat(3, 1fr); } }
-
         .card { background: var(--card); padding: 18px; border-radius: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center; border: 1px solid var(--border); }
         .card h3 { margin: 0 0 8px 0; font-size: 12px; color: var(--sub-text); font-weight: 600; }
-        .dash-value-readonly, .dash-input-editable { font-size: 28px; font-weight: 700; color: var(--primary); font-variant-numeric: tabular-nums; }
-        .dash-input-editable { border: none; border-bottom: 2px dashed var(--border); width: 80px; text-align: center; background: transparent; color: var(--text); }
+        .dash-value-readonly, .dash-input-editable { font-size: 28px; font-weight: 700; color: var(--primary); }
+        .dash-input-editable { border: none; border-bottom: 2px dashed var(--border); width: 80px; text-align: center; background: transparent; color: var(--text); outline: none; }
+        .sub-value { font-size: 12px; color: var(--sub-text); margin-top: 8px; }
 
-        /* 输入面板适配 */
+        /* 状态颜色标签 */
+        .status-badge { 
+            display: inline-block; font-size: 13px; font-weight: 700; padding: 2px 10px; 
+            border-radius: 20px; margin-top: 8px; transition: 0.3s;
+        }
+        .st-red { color: var(--status-red); background: rgba(255, 59, 48, 0.1); }
+        .st-yellow { color: var(--status-yellow); background: rgba(255, 149, 0, 0.1); }
+        .st-green { color: var(--status-green); background: rgba(52, 199, 89, 0.1); }
+
         .input-panel { background: var(--card); padding: 16px; border-radius: 14px; border: 1px solid var(--border); margin-bottom: 20px; }
-        
         .form-row { display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px solid var(--border); }
         @media (min-width: 600px) { .form-row { flex-direction: row; align-items: center; } }
-
         .row-label { font-size: 14px; font-weight: 600; margin-bottom: 8px; width: 100%; }
         @media (min-width: 600px) { .row-label { width: 110px; margin-bottom: 0; } }
-
-        .time-range-group { display: flex; align-items: center; gap: 8px; width: 100%; justify-content: space-between; }
-        
-        .time-box { 
-            display: flex; align-items: center; background: var(--input-bg); border-radius: 8px; 
-            padding: 8px 10px; flex: 1; min-width: 0; /* 防止溢出 */
-        }
+        .time-range-group { display: flex; align-items: center; gap: 8px; width: 100%; }
+        .time-box { display: flex; align-items: center; background: var(--input-bg); border-radius: 8px; padding: 8px 10px; flex: 1; min-width: 0; }
         .time-box span { font-size: 10px; color: var(--sub-text); margin-right: 4px; white-space: nowrap; }
-        
-        input[type="time"], input[type="date"] { 
-            border: none; background: transparent; font-size: 15px; color: var(--text); 
-            outline: none; width: 100%; -webkit-appearance: none; /* 移除iOS默认样式 */
-        }
-
-        .btn-submit { 
-            background: var(--primary); color: white; border: none; padding: 15px; 
-            border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%; 
-            margin-top: 15px; font-size: 16px;
-        }
-
-        /* 表格滚动适配 */
+        input[type="time"], input[type="date"] { border: none; background: transparent; font-size: 15px; color: var(--text); width: 100%; outline: none; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; cursor: pointer; font-weight: 600; width: 100%; margin-top: 15px; font-size: 16px; }
         .table-container { background: var(--card); border-radius: 14px; border: 1px solid var(--border); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 500px; } /* 移动端保证最小宽度，支持横滑 */
+        table { width: 100%; border-collapse: collapse; min-width: 500px; }
         th, td { padding: 12px 10px; font-size: 13px; text-align: left; border-bottom: 1px solid var(--border); }
-        .btn-del { color: var(--status-red); font-size: 12px; font-weight: 600; background: none; border: none; }
+        .btn-del { color: var(--status-red); font-weight: 600; background: none; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <h2 style="text-align: center; margin: 10px 0 20px 0; font-size: 20px;">📅 工时看板</h2>
+    <h2 style="text-align: center; margin: 10px 0 20px 0; font-size: 20px; font-weight: 700;">📅 工时看板</h2>
 
     <div class="dashboard">
         <div class="card">
             <h3>累计加班 (H)</h3>
-            <input type="number" id="dashTotal" class="dash-input-editable" step="0.1" onchange="manualUpdateTotal()">
-            <span id="otStatusBadge" class="status-badge st-red" style="display:block; margin-top:5px; width:fit-content; margin-inline:auto;">0.0h</span>
-            <div class="sub-value">目标: <input type="number" id="dashGoal" value="30" style="width:30px; border:none; background:transparent; color:var(--text); text-align:center;" onchange="render()"> H</div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <input type="number" id="dashTotal" class="dash-input-editable" step="0.1" onchange="manualUpdateTotal()">
+                <div id="otStatusBadge" class="status-badge">0.0h</div>
+            </div>
+            <div class="sub-value">目标: <input type="number" id="dashGoal" value="30" style="width:30px; border:none; background:transparent; color:var(--text); text-align:center; font-weight:bold;" onchange="render()"> H</div>
         </div>
+
         <div class="card">
-            <h3>剩余需加班 (H)</h3>
+            <h3>剩余总需求 (H)</h3>
             <span id="dashRemainingValue" class="dash-value-readonly">0.0</span>
             <div class="sub-value" id="dashRemainingTime">0时0分</div>
         </div>
+
         <div class="card">
             <h3>日均需加班 (H)</h3>
             <span id="dashDailyValue" class="dash-value-readonly" style="color: var(--sub-text);">0.0</span>
@@ -125,13 +115,12 @@
 
     <div class="table-container">
         <table>
-            <thead><tr><th>日期</th><th>正班</th><th>加班</th><th>明细</th><th>操作</th></tr></thead>
+            <thead><tr><th>日期</th><th>正班</th><th>加班</th><th>时间明细</th><th>操作</th></tr></thead>
             <tbody id="recordTable"></tbody>
         </table>
     </div>
 
 <script>
-    // JS 逻辑保持 V3.5 核心不变（含今日工作日计算）
     let appState = {
         records: JSON.parse(localStorage.getItem('v3_records')) || [],
         manualOffset: parseFloat(localStorage.getItem('v3_offset')) || 0,
@@ -196,24 +185,39 @@
         const tbody = document.getElementById('recordTable');
         tbody.innerHTML = '';
         let currentMonth = new Date().toISOString().slice(0, 7), calcTotalMin = 0;
+        
         appState.records.forEach(r => {
             let s = calculateDay(r);
             if (r.date.startsWith(currentMonth)) calcTotalMin += s.ot;
             tbody.innerHTML += `<tr><td>${r.date.slice(5)}</td><td>${minToH(s.reg)}H</td><td style="color:var(--primary);font-weight:700">${minToH(s.ot)}H</td><td><small>${r.otStart}-${r.otEnd}</small></td><td><button class="btn-del" onclick="appState.records=appState.records.filter(x=>x.date!=='${r.date}');saveData()">删除</button></td></tr>`;
         });
+
         let goal = parseFloat(document.getElementById('dashGoal').value) || 30;
         let finalH = (calcTotalMin/60) + appState.manualOffset;
         let remainH = Math.max(0, goal - finalH);
         let days = getRemainingWorkdays();
+
+        // UI 渲染
         document.getElementById('dashTotal').value = finalH.toFixed(1);
         document.getElementById('dashRemainingValue').textContent = remainH.toFixed(1);
         document.getElementById('dashRemainingTime').textContent = minToCN(remainH * 60);
         document.getElementById('dashDailyValue').textContent = days > 0 ? (remainH/days).toFixed(1) : "0.0";
         document.getElementById('dashDaysLeft').textContent = `剩余工作日: ${days} 天 (含今日)`;
-        const diff = finalH - goal;
+
+        // 核心：计算差值并更新颜色
         const badge = document.getElementById('otStatusBadge');
+        const diff = finalH - goal;
         badge.textContent = (diff >= 0 ? "+" : "") + diff.toFixed(1) + "h";
-        badge.className = "status-badge " + (finalH >= goal ? "st-green" : (finalH >= goal-5 ? "st-yellow" : "st-red"));
+        
+        // 移除旧颜色并添加新颜色
+        badge.classList.remove('st-red', 'st-yellow', 'st-green');
+        if (finalH >= goal) {
+            badge.classList.add('st-green');
+        } else if (finalH >= goal - 5) {
+            badge.classList.add('st-yellow');
+        } else {
+            badge.classList.add('st-red');
+        }
     }
 
     document.getElementById('dateInput').valueAsDate = new Date();
